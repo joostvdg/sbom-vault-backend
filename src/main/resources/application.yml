@@ -1,0 +1,30 @@
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sbomvault
+    username: sbom
+    password: sbom
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.lob.non_contextual_creation: true
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+sbomvault:
+  cdevents:
+    allowTypes:
+      - dev.cdevents.artifact.packaged.v1
+      - dev.cdevents.artifact.published.v1
+      - dev.cdevents.build.finished.v1
+      - dev.cdevents.pipeline.run.finished.v1
