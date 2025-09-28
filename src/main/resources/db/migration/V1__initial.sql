@@ -80,3 +80,16 @@ CREATE TABLE verification_run (
 );
 CREATE INDEX verification_details_gin ON verification_run USING GIN (details_jsonb);
 CREATE INDEX artifact_entity_ref_idx ON artifact(entity_ref);
+
+-- Artifact Verification Table
+CREATE TABLE artifact_verification (
+   id UUID PRIMARY KEY,
+   artifact_id UUID NOT NULL REFERENCES artifact(id) ON DELETE CASCADE,
+   verified BOOLEAN,
+   verification_tool TEXT,
+   verification_method TEXT,
+   verification_output TEXT,
+   verification_timestamp TIMESTAMPTZ DEFAULT now(),
+   last_verified TIMESTAMPTZ
+);
+

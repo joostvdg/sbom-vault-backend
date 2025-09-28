@@ -43,3 +43,27 @@ services:
 volumes:
   pgdata: {}
 ```
+
+## API Examples
+
+### Ingest SBOM with CD Event
+
+```bash
+http POST localhost:8080/api/cdevents/ingest \
+  Content-Type:application/json \
+  < examples/sbom-event.json
+```
+
+### Submit Verification Event
+
+```bash
+http POST localhost:8080/api/cdevents/verify \
+    Content-Type:application/json \
+    < examples/verification-event.json
+```
+
+### Get Artifact Information
+
+```bash
+http GET localhost:8080/api/artifacts/registry.example.com/app:v1.0.0
+```
