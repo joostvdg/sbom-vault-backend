@@ -1,0 +1,8 @@
+{
+  "name": "app",
+  "version": "v1.0.0",
+  "registry": "registry.example.com",
+  "digest": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+  "size": 12345678,
+  "createdAt": "2025-06-01T12:00:00Z"
+}

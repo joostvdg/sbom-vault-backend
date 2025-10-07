@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: joostvdg.net
+spec:
+  type: team
+  profile:
+    displayName: joostvdg.net
+    email: dev@joostvdg.net
+  children: []

@@ -1,22 +1,18 @@
 {
-  "specversion": "0.3",
-  "type": "dev.cdevents.artifact.signed.0.1.0",
-  "source": "https://sigstore.example.com",
-  "id": "verification-67890",
-  "time": "2023-10-15T10:35:00Z",
-  "subject": {
-    "id": "artifact://registry.example.com/app:v1.0.0",
-    "type": "artifact",
-    "content": {
-      "signature": {
-        "keyId": "cosign-key-123",
-        "signature": "MEUCIQDtU5...",
-        "certificate": "-----BEGIN CERTIFICATE-----..."
-      },
-      "attestation": {
-        "predicateType": "https://slsa.dev/provenance/v0.2",
-        "statement": "eyJhbGciOiJ..."
-      }
-    }
+  "specversion": "1.0",
+  "type": "dev.cdevents.artifact.verification.finished.v1",
+  "source": "/example/source",
+  "id": "abcd-1234-efgh-5678",
+  "time": "2025-06-01T12:05:00Z",
+  "data": {
+    "artifact": {
+      "name": "app",
+      "version": "v1.0.0",
+      "registry": "registry.example.com",
+      "digest": "sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    },
+    "verificationResult": "SUCCESS",
+    "verifier": "cosign",
+    "signature": "MEUCIQDf...validbase64...IDAQAB"
   }
 }

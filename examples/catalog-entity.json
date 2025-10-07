@@ -1,0 +1,26 @@
+{
+  "entity_ref": "component:default/app",
+  "kind": "Component",
+  "namespace": "default",
+  "name": "app",
+  "title": "Example App",
+  "owner_ref": "user:default/owner",
+  "system_ref": "system:default/example-system",
+  "relations_jsonb": {
+    "dependsOn": ["resource:default/db"]
+  },
+  "raw_entity_jsonb": {
+    "apiVersion": "backstage.io/v1alpha1",
+    "kind": "Component",
+    "metadata": {
+      "name": "app",
+      "namespace": "default",
+      "title": "Example App"
+    },
+    "spec": {
+      "type": "service",
+      "owner": "user:default/owner",
+      "system": "system:default/example-system"
+    }
+  }
+}

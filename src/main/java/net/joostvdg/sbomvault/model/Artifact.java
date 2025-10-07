@@ -5,16 +5,20 @@ import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
+import org.hibernate.annotations.GenericGenerator;
 
 @Entity
 @Table(name = "artifact")
 public class Artifact {
 
-  @Id @GeneratedValue private UUID id;
+  @Id
+  @GeneratedValue(generator = "UUID")
+  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+  @Column(name = "id", updatable = false, nullable = false)
+  private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "entity_ref")
-  private CatalogEntity catalogEntity;
+  @Column(name = "catalog_reference", nullable = false)
+  private String catalogReference;
 
   @Column(name = "kind", nullable = false)
   private String kind;
@@ -23,7 +27,7 @@ public class Artifact {
   private String name;
 
   @Column(name = "version")
-  private String version;
+  private String artifactVersion;
 
   @Column(name = "digest", unique = true)
   private String digest;
@@ -66,12 +70,12 @@ public class Artifact {
     this.id = id;
   }
 
-  public CatalogEntity getCatalogEntity() {
-    return catalogEntity;
+  public String getCatalogReference() {
+    return catalogReference;
   }
 
-  public void setCatalogEntity(CatalogEntity catalogEntity) {
-    this.catalogEntity = catalogEntity;
+  public void setCatalogReference(String catalogReference) {
+    this.catalogReference = catalogReference;
   }
 
   public String getKind() {
@@ -90,12 +94,12 @@ public class Artifact {
     this.name = name;
   }
 
-  public String getVersion() {
-    return version;
+  public String getArtifactVersion() {
+    return artifactVersion;
   }
 
-  public void setVersion(String version) {
-    this.version = version;
+  public void setArtifactVersion(String version) {
+    this.artifactVersion = version;
   }
 
   public String getDigest() {
@@ -184,5 +188,50 @@ public class Artifact {
 
   public void setVerifications(Set<ArtifactVerification> verifications) {
     this.verifications = verifications;
+  }
+
+  @Override
+  public String toString() {
+    return "Artifact{"
+        + "id="
+        + id
+        + ", catalog_reference="
+        + catalogReference
+        + ", kind='"
+        + kind
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", version='"
+        + artifactVersion
+        + '\''
+        + ", digest='"
+        + digest
+        + '\''
+        + ", registry='"
+        + registry
+        + '\''
+        + ", repository='"
+        + repository
+        + '\''
+        + ", uri='"
+        + uri
+        + '\''
+        + ", createdAt="
+        + createdAt
+        + ", sboms="
+        + sboms
+        + ", signatures="
+        + signatures
+        + ", checksums="
+        + checksums
+        + ", attestations="
+        + attestations
+        + ", verificationRuns="
+        + verificationRuns
+        + ", verifications="
+        + verifications
+        + '}';
   }
 }

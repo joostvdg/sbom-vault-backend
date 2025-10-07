@@ -1,29 +1,17 @@
 -- V1__initial.sql
-CREATE TABLE catalog_entity (
-  entity_ref TEXT PRIMARY KEY,
-  kind TEXT NOT NULL,
-  namespace TEXT DEFAULT 'default',
-  name TEXT NOT NULL,
-  title TEXT,
-  owner_ref TEXT,
-  system_ref TEXT,
-  relations_jsonb JSONB,
-  raw_entity_jsonb JSONB,
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
 CREATE TABLE artifact (
-  id UUID PRIMARY KEY,
-  entity_ref TEXT REFERENCES catalog_entity(entity_ref) ON DELETE SET NULL,
-  kind TEXT NOT NULL,
-  name TEXT NOT NULL,
-  version TEXT,
-  digest TEXT UNIQUE,
-  registry TEXT,
-  repository TEXT,
-  uri TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    id UUID PRIMARY KEY,
+    catalog_reference TEXT,
+    kind TEXT NOT NULL,
+    name TEXT NOT NULL,
+    version TEXT,
+    digest TEXT UNIQUE,
+    registry TEXT,
+    repository TEXT,
+    uri TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 );
+CREATE INDEX catalog_reference_idx ON artifact(catalog_reference);
 
 CREATE TABLE sbom (
   id UUID PRIMARY KEY,

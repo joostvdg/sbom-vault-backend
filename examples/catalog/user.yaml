@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: joostvdg
+  description: Joost
+spec:
+  profile:
+    displayName: Joost van der Griendt
+    email: dev@joostvdg.com
+  memberOf: [joostvdg.net]

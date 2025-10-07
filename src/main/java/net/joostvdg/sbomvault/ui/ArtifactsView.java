@@ -17,14 +17,9 @@ public class ArtifactsView extends VerticalLayout {
     setSizeFull();
     Grid<Artifact> grid = new Grid<>(Artifact.class, false);
     // Replace direct entityRef access with access through the catalogEntity relationship
-    grid.addColumn(
-            artifact ->
-                artifact.getCatalogEntity() != null
-                    ? artifact.getCatalogEntity().getEntityRef()
-                    : "")
-        .setHeader("EntityRef");
+    grid.addColumn(Artifact::getCatalogReference).setHeader("Catalog Reference");
     grid.addColumn(Artifact::getName).setHeader("Name");
-    grid.addColumn(Artifact::getVersion).setHeader("Version");
+    grid.addColumn(Artifact::getArtifactVersion).setHeader("Version");
     grid.addColumn(Artifact::getDigest).setHeader("Digest");
     grid.setItems(repo.findAll());
     add(new Button("Refresh", e -> grid.setItems(repo.findAll())), grid);

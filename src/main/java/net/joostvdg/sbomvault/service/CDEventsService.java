@@ -9,9 +9,7 @@ import java.time.ZoneId;
 import java.util.Map;
 import java.util.UUID;
 import net.joostvdg.sbomvault.model.Artifact;
-import net.joostvdg.sbomvault.model.CatalogEntity;
 import net.joostvdg.sbomvault.repo.ArtifactRepo;
-import net.joostvdg.sbomvault.repo.CatalogEntityRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,13 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CDEventsService {
   private final ObjectMapper om = new ObjectMapper();
   private final ArtifactRepo repo;
-  private final CatalogEntityRepository catalogEntityRepo;
 
   private final Logger log = LoggerFactory.getLogger(CDEventsService.class);
 
-  public CDEventsService(ArtifactRepo repo, CatalogEntityRepository catalogEntityRepo) {
+  public CDEventsService(ArtifactRepo repo) {
     this.repo = repo;
-    this.catalogEntityRepo = catalogEntityRepo;
   }
 
   @Transactional
@@ -64,22 +60,6 @@ public class CDEventsService {
       String kind = data.path("artifact").path("kind").asText("oci");
       String uri = data.path("artifact").path("uri").asText(null);
 
-      // First, find or create the catalog entity
-      CatalogEntity catalogEntity =
-          catalogEntityRepo
-              .findById(entityRef)
-              .orElseGet(
-                  () -> {
-                    CatalogEntity newEntity = new CatalogEntity();
-                    newEntity.setEntityRef(entityRef);
-                    // Set minimum required fields for a new CatalogEntity
-                    newEntity.setKind("component");
-                    newEntity.setName(name);
-                    // Default values for other required fields
-                    newEntity.setUpdatedAt(OffsetDateTime.now(zoneId));
-                    return catalogEntityRepo.save(newEntity);
-                  });
-
       // Now handle the artifact
       Artifact artifact =
           repo.findByDigest(digest)
@@ -95,7 +75,7 @@ public class CDEventsService {
       artifact.setDigest(digest);
       artifact.setName(name);
       artifact.setKind(kind);
-      artifact.setCatalogEntity(catalogEntity); // Now we set the proper entity object
+      artifact.setCatalogReference(entityRef); // Now we set the proper entity object
       artifact.setUri(uri);
 
       repo.save(artifact);
