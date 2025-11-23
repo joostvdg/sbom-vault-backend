@@ -21,6 +21,16 @@ management:
       exposure:
         include: health,info
 
+# https://stackoverflow.com/questions/75372808/vaadin-23-rest-api-and-ui-in-spring-boot-app
+vaadin:
+  exclude-urls: /api/**
+
+springdoc:
+  api-docs:
+    path: /api/v3/api-docs
+  swagger-ui:
+    path: /api/swagger-ui.html
+
 sbomvault:
   cdevents:
     allowTypes:

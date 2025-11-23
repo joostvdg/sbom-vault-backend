@@ -2,12 +2,26 @@
 
 This starter aligns artifacts to Backstage **entityRefs** and includes a **CDEvents** receiver that accepts CloudEvents (structured & binary).
 
+## Goal
+
+* Be database for tracking the life of applications
+    * System topology should be managed via Backstage
+    * Alternative topology in CMDB (like Service Now)
+    * Artifacts by their respective Artifact Repository system (e.g., Nexus/Artifactory/Harbor/GHCR/ECR)
+* Collect references to Backstage System Topology
+    * be configured to connect to one or more Backstage instances
+* Collect references to Artifacts, related to an external reference
+
+## TODO
+
 ## How to run
-1. Start PostgreSQL (example docker-compose below) and set `spring.datasource.*` in `application.yml` if needed.
+1. 
+2. Start PostgreSQL (example docker-compose below) and set `spring.datasource.*` in `application.yml` if needed.
 2. `./mvnw spring-boot:run` (or `mvn spring-boot:run` if you have Maven installed).
 3. Visit `http://localhost:8080/artifacts` for the Vaadin view; `http://localhost:8080/swagger-ui.html` for OpenAPI.
 
 ## CDEvents
+
 POST to `/api/v1/cdevents` with header `Content-Type: application/cloudevents+json` for structured mode
 or send `ce-*` headers in binary mode.
 

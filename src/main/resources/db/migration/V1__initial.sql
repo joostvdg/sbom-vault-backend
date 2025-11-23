@@ -9,7 +9,7 @@ CREATE TABLE artifact (
     registry TEXT,
     repository TEXT,
     uri TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX catalog_reference_idx ON artifact(catalog_reference);
 
@@ -67,7 +67,6 @@ CREATE TABLE verification_run (
   finished_at TIMESTAMPTZ
 );
 CREATE INDEX verification_details_gin ON verification_run USING GIN (details_jsonb);
-CREATE INDEX artifact_entity_ref_idx ON artifact(entity_ref);
 
 -- Artifact Verification Table
 CREATE TABLE artifact_verification (

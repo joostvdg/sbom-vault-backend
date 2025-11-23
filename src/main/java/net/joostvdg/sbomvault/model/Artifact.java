@@ -3,13 +3,19 @@ package net.joostvdg.sbomvault.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "artifact")
 public class Artifact {
+
+  private static final ZoneId ZONE_ID = ZoneId.of("UTC");
 
   @Id
   @GeneratedValue(generator = "UUID")
@@ -44,6 +50,17 @@ public class Artifact {
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
 
+  @ManyToMany
+  @JoinTable(
+      name = "artifact_topology",
+      joinColumns = @JoinColumn(name = "artifact_id"),
+      inverseJoinColumns = @JoinColumn(name = "topology_id"))
+  private Set<TopologyReference> topologyReferences;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "labels_jsonb", nullable = false)
+  private Map<String, Object> labels;
+
   @OneToMany(mappedBy = "artifact", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<Sbom> sboms;
 
@@ -62,6 +79,17 @@ public class Artifact {
   @OneToMany(mappedBy = "artifact", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<ArtifactVerification> verifications;
 
+  @PrePersist
+  public void onCreate() {
+    if (createdAt == null) {
+      createdAt = OffsetDateTime.now(ZONE_ID);
+    }
+    if (labels == null) {
+      labels = Map.of();
+    }
+  }
+
+  // getters and setters omitted for brevity (include for all fields)
   public UUID getId() {
     return id;
   }
@@ -98,8 +126,8 @@ public class Artifact {
     return artifactVersion;
   }
 
-  public void setArtifactVersion(String version) {
-    this.artifactVersion = version;
+  public void setArtifactVersion(String artifactVersion) {
+    this.artifactVersion = artifactVersion;
   }
 
   public String getDigest() {
@@ -140,6 +168,22 @@ public class Artifact {
 
   public void setCreatedAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public Set<TopologyReference> getTopologyReferences() {
+    return topologyReferences;
+  }
+
+  public void setTopologyReferences(Set<TopologyReference> topologyReferences) {
+    this.topologyReferences = topologyReferences;
+  }
+
+  public Map<String, Object> getLabels() {
+    return labels;
+  }
+
+  public void setLabels(Map<String, Object> labels) {
+    this.labels = labels;
   }
 
   public Set<Sbom> getSboms() {
