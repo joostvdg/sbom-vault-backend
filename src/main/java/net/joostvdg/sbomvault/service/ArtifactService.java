@@ -1,11 +1,18 @@
 /* (C)2025 */
 package net.joostvdg.sbomvault.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import net.joostvdg.sbomvault.controller.SbomUploadRequest;
+import net.joostvdg.sbomvault.model.Artifact;
+import net.joostvdg.sbomvault.model.Sbom;
 import net.joostvdg.sbomvault.repo.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ArtifactService {
@@ -55,5 +62,53 @@ public class ArtifactService {
               details.put("verifications", verificationRepo.findByArtifactId(artifact.getId()));
               return details;
             });
+  }
+
+  public java.util.List<net.joostvdg.sbomvault.model.Artifact> getAllArtifacts() {
+    return artifactRepo.findAll();
+  }
+
+  public net.joostvdg.sbomvault.model.Artifact createArtifact(
+      net.joostvdg.sbomvault.controller.ArtifactCreateRequest req) {
+    net.joostvdg.sbomvault.model.Artifact a = new net.joostvdg.sbomvault.model.Artifact();
+    a.setCatalogReference(req.getCatalogReference());
+    a.setKind(req.getKind());
+    a.setName(req.getName());
+    a.setArtifactVersion(req.getArtifactVersion());
+    a.setDigest(req.getDigest());
+    a.setRegistry(req.getRegistry());
+    a.setRepository(req.getRepository());
+    // prefer explicit uri if provided, otherwise derive from registry/repository
+    if (req.getUri() != null && !req.getUri().isBlank()) {
+      a.setUri(req.getUri());
+    } else if (req.getRegistry() != null && req.getRepository() != null) {
+      a.setUri(req.getRegistry() + "/" + req.getRepository());
+    }
+    a.setLabels(req.getLabels()); // null is fine; @PrePersist will set empty map
+    return artifactRepo.save(a);
+  }
+
+  @Transactional
+  public Sbom addSbomToArtifact(UUID artifactId, SbomUploadRequest req) {
+    Artifact artifact =
+        artifactRepo
+            .findById(artifactId)
+            .orElseThrow(() -> new IllegalArgumentException("Artifact not found: " + artifactId));
+    Sbom sbom = new Sbom();
+    sbom.setArtifact(artifact);
+    sbom.setFormat(req.getFormat());
+    sbom.setSource(req.getSource());
+    sbom.setDocName(req.getDocName());
+    sbom.setDocVersion(req.getDocVersion());
+
+    ObjectMapper om = new ObjectMapper();
+    String jsonString;
+    try {
+      jsonString = om.writeValueAsString(req.getJsonb());
+    } catch (JsonProcessingException e) {
+      throw new IllegalArgumentException("Invalid JSON for sbom", e);
+    }
+    sbom.setJsonb(jsonString);
+    return sbomRepo.save(sbom);
   }
 }

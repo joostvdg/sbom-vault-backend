@@ -36,7 +36,7 @@ public class Sbom {
 
   @Column(name = "jsonb", nullable = false)
   @JdbcTypeCode(SqlTypes.JSON)
-  private Object jsonb;
+  private String jsonb;
 
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
@@ -89,11 +89,11 @@ public class Sbom {
     this.docVersion = docVersion;
   }
 
-  public Object getJsonb() {
+  public String getJsonb() {
     return jsonb;
   }
 
-  public void setJsonb(Object jsonb) {
+  public void setJsonb(String jsonb) {
     this.jsonb = jsonb;
   }
 
@@ -103,5 +103,12 @@ public class Sbom {
 
   public void setCreatedAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  @PrePersist
+  public void prePersist() {
+    if (this.createdAt == null) {
+      this.createdAt = OffsetDateTime.now(Defaults.ZONE_ID);
+    }
   }
 }

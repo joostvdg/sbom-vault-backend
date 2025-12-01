@@ -81,3 +81,42 @@ http POST localhost:8080/api/cdevents/verify \
 ```bash
 http GET localhost:8080/api/artifacts/registry.example.com/app:v1.0.0
 ```
+
+
+### Create Artifact
+
+```shell
+http POST http://localhost:8080/api/artifacts \
+  catalogReference="example-catalog" \
+  kind="container" \
+  name="example-artifact" \
+  artifactVersion="1.0.0" \
+  digest="sha256:0123456789abcdef" \
+  registry="ghcr.io" \
+  repository="joostvdg/example-artifact" \
+  uri="ghcr.io/joostvdg/example-artifact:1.0.0" \
+  labels:='{"env":"dev","team":"platform"}'
+```
+
+### Get All Artifacts
+
+```shell
+http http://localhost:8080/api/artifacts
+```
+
+### Attach SBOM
+
+```shell
+UUID=9b64c4da-0bbb-42c9-bdbd-cb3422c8be04
+```
+
+```shell
+# replace {UUID} with the artifact id or use the full Location URL path
+http POST http://localhost:8080/api/artifacts/${UUID}/sboms \
+  format="cyclonedx1.6+json" \
+  source="snyk" \
+  docName="my-sbom" \
+  docVersion="1.0" \
+  jsonb:=@mySBOM.json
+
+```

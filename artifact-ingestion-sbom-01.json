@@ -1,0 +1,46 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "catalogReference": "string",
+  "kind": "jar",
+  "name": "sbom-vault-backend-0.1.0-SNAPSHOT.jar",
+  "artifactVersion": "0.1.0",
+  "digest": "string",
+  "registry": "string",
+  "repository": "string",
+  "uri": "string",
+  "createdAt": "2025-11-29T17:58:52.758Z",
+  "topologyReferences": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "system": "backstage",
+      "externalId": "component::git-next-tag-cli",
+      "reference": "http://localhost:3000/catalog/default/component/git-next-tag-cli",
+      "raw": {
+        "env": "prd",
+        "owner": "me",
+        "language": "rust"
+      },
+      "createdAt": "2025-11-29T17:58:52.758Z",
+      "artifacts": [
+        "string"
+      ]
+    }
+  ],
+  "labels": {
+    "env": "prd",
+    "owner": "me",
+    "language": "rust"
+  },
+  "sboms": [
+    {
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "artifact": "sbom-vault-backend-0.1.0-SNAPSHOT.jar",
+      "format": "cyclonedx1.6+json ",
+      "source": "snyk",
+      "docName": "pom.xml",
+      "docVersion": "0.1.0",
+      "jsonb": "",
+      "createdAt": "2025-11-29T17:58:52.758Z"
+    }
+  ]
+}

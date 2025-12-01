@@ -3,7 +3,6 @@ package net.joostvdg.sbomvault.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -16,8 +15,6 @@ import org.hibernate.type.SqlTypes;
     name = "topology_reference",
     uniqueConstraints = @UniqueConstraint(columnNames = {"system", "external_id"}))
 public class TopologyReference {
-
-  private static final ZoneId ZONE_ID = ZoneId.of("UTC");
 
   @Id
   @GeneratedValue(generator = "UUID")
@@ -47,7 +44,7 @@ public class TopologyReference {
   @PrePersist
   public void onCreate() {
     if (createdAt == null) {
-      createdAt = OffsetDateTime.now(ZONE_ID);
+      createdAt = OffsetDateTime.now(Defaults.ZONE_ID);
     }
   }
 

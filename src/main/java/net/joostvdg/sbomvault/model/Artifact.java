@@ -3,7 +3,6 @@ package net.joostvdg.sbomvault.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -14,8 +13,6 @@ import org.hibernate.type.SqlTypes;
 @Entity
 @Table(name = "artifact")
 public class Artifact {
-
-  private static final ZoneId ZONE_ID = ZoneId.of("UTC");
 
   @Id
   @GeneratedValue(generator = "UUID")
@@ -82,7 +79,7 @@ public class Artifact {
   @PrePersist
   public void onCreate() {
     if (createdAt == null) {
-      createdAt = OffsetDateTime.now(ZONE_ID);
+      createdAt = OffsetDateTime.now(Defaults.ZONE_ID);
     }
     if (labels == null) {
       labels = Map.of();
