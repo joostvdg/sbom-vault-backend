@@ -13,7 +13,13 @@ public class ArtifactCreateRequest {
   private String repository;
   private String uri;
   private Map<String, Object> labels;
+  private String changedBy;
+  private String signature;
+  private String publicKey;
+  private String publicKeyFingerprint;
+  private String signingKeyType;
 
+  // Getters and setters
   public String getCatalogReference() {
     return catalogReference;
   }
@@ -84,5 +90,45 @@ public class ArtifactCreateRequest {
 
   public void setLabels(Map<String, Object> labels) {
     this.labels = labels;
+  }
+
+  public String getChangedBy() {
+    return changedBy;
+  }
+
+  public void setChangedBy(String changedBy) {
+    this.changedBy = changedBy;
+  }
+
+  public String getSignature() {
+    return signature;
+  }
+
+  public void setSignature(String signature) {
+    this.signature = signature;
+  }
+
+  public String getPublicKey() {
+    return publicKey;
+  }
+
+  public void setPublicKey(String publicKey) {
+    this.publicKey = publicKey;
+  }
+
+  public String getPublicKeyFingerprint() {
+    return publicKeyFingerprint;
+  }
+
+  public void setPublicKeyFingerprint(String publicKeyFingerprint) {
+    this.publicKeyFingerprint = publicKeyFingerprint;
+  }
+
+  public String getSigningKeyType() {
+    return signingKeyType;
+  }
+
+  public void setSigningKeyType(String signingKeyType) {
+    this.signingKeyType = signingKeyType;
   }
 }

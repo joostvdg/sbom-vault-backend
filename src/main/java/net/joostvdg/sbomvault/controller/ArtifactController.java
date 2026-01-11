@@ -1,11 +1,13 @@
 /* (C)2025 */
 package net.joostvdg.sbomvault.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.joostvdg.sbomvault.model.Artifact;
+import net.joostvdg.sbomvault.model.ArtifactAudit;
 import net.joostvdg.sbomvault.service.ArtifactService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,8 +41,27 @@ public class ArtifactController {
 
   @PostMapping
   public ResponseEntity<Map<String, String>> createArtifact(
-      @RequestBody ArtifactCreateRequest req) {
-    var saved = artifactService.createArtifact(req);
+      @RequestBody ArtifactCreateRequest req, HttpServletRequest request) {
+
+    String changedBy = request.getHeader("X-Changed-By");
+    String signature = request.getHeader("X-Signature");
+    String publicKey = request.getHeader("X-Public-Key");
+    String publicKeyFingerprint = request.getHeader("X-Public-Key-Fingerprint");
+    String signingKeyType = request.getHeader("X-Signing-Key-Type");
+    String clientIp = request.getRemoteAddr();
+    String userAgent = request.getHeader("User-Agent");
+
+    var saved =
+        artifactService.createArtifactWithAudit(
+            req,
+            changedBy,
+            signature,
+            publicKey,
+            publicKeyFingerprint,
+            signingKeyType,
+            clientIp,
+            userAgent);
+
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("/{id}")
@@ -61,5 +82,19 @@ public class ArtifactController {
             .toUri();
     Map<String, String> body = Map.of("id", saved.getId().toString(), "url", location.toString());
     return ResponseEntity.created(location).body(body);
+  }
+
+  @PatchMapping("/{id}")
+  public ResponseEntity<Artifact> updateArtifact(
+      @PathVariable UUID id, @RequestBody ArtifactUpdateRequest req, HttpServletRequest request) {
+    String clientIp = request.getRemoteAddr();
+    String userAgent = request.getHeader("User-Agent");
+    Artifact updated = artifactService.updateArtifact(id, req, clientIp, userAgent);
+    return ResponseEntity.ok(updated);
+  }
+
+  @GetMapping("/{id}/audit")
+  public ResponseEntity<List<ArtifactAudit>> getAuditHistory(@PathVariable UUID id) {
+    return ResponseEntity.ok(artifactService.getArtifactAuditHistory(id));
   }
 }

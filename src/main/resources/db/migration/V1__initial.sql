@@ -1,4 +1,6 @@
 -- V1__initial.sql
+
+-- Initial schema for Artifact Management System
 CREATE TABLE artifact (
     id UUID PRIMARY KEY,
     catalog_reference TEXT,
@@ -9,9 +11,11 @@ CREATE TABLE artifact (
     registry TEXT,
     repository TEXT,
     uri TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    change_version BIGINT NOT NULL DEFAULT 0
 );
 CREATE INDEX catalog_reference_idx ON artifact(catalog_reference);
+CREATE INDEX artifact_change_version_idx ON artifact (id, change_version);
 
 CREATE TABLE sbom (
   id UUID PRIMARY KEY,

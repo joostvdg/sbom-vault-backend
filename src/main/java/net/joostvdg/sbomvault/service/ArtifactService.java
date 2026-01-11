@@ -3,12 +3,12 @@ package net.joostvdg.sbomvault.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import net.joostvdg.sbomvault.controller.ArtifactCreateRequest;
+import net.joostvdg.sbomvault.controller.ArtifactUpdateRequest;
 import net.joostvdg.sbomvault.controller.SbomUploadRequest;
 import net.joostvdg.sbomvault.model.Artifact;
+import net.joostvdg.sbomvault.model.ArtifactAudit;
 import net.joostvdg.sbomvault.model.Sbom;
 import net.joostvdg.sbomvault.repo.*;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,7 @@ public class ArtifactService {
   private final ChecksumRepository checksumRepo;
   private final AttestationRepository attestationRepo;
   private final ArtifactVerificationRepository verificationRepo;
+  private final ArtifactAuditRepository artifactAuditRepository;
 
   public ArtifactService(
       ArtifactRepo artifactRepo,
@@ -30,13 +31,15 @@ public class ArtifactService {
       SignatureRepository signatureRepo,
       ChecksumRepository checksumRepo,
       AttestationRepository attestationRepo,
-      ArtifactVerificationRepository verificationRepo) {
+      ArtifactVerificationRepository verificationRepo,
+      ArtifactAuditRepository artifactAuditRepository) {
     this.artifactRepo = artifactRepo;
     this.sbomRepo = sbomRepo;
     this.signatureRepo = signatureRepo;
     this.checksumRepo = checksumRepo;
     this.attestationRepo = attestationRepo;
     this.verificationRepo = verificationRepo;
+    this.artifactAuditRepository = artifactAuditRepository;
   }
 
   public Optional<Map<String, Object>> getArtifactDetails(String artifactUri) {
@@ -85,6 +88,7 @@ public class ArtifactService {
       a.setUri(req.getRegistry() + "/" + req.getRepository());
     }
     a.setLabels(req.getLabels()); // null is fine; @PrePersist will set empty map
+    a.setChangeVersion(0L);
     return artifactRepo.save(a);
   }
 
@@ -110,5 +114,100 @@ public class ArtifactService {
     }
     sbom.setJsonb(jsonString);
     return sbomRepo.save(sbom);
+  }
+
+  @Transactional
+  public Artifact createArtifactWithAudit(
+      ArtifactCreateRequest req,
+      String changedBy,
+      String signature,
+      String publicKey,
+      String publicKeyFingerprint,
+      String signingKeyType,
+      String clientIp,
+      String userAgent) {
+    Artifact artifact = createArtifact(req);
+
+    // Create initial audit record (version 0)
+    ArtifactAudit audit = new ArtifactAudit();
+    audit.setArtifactId(artifact.getId());
+    audit.setVersion(0L);
+    audit.setOperation("CREATE");
+    audit.setChangedBy(changedBy);
+    audit.setSignature(signature);
+    audit.setPublicKey(publicKey);
+    audit.setPublicKeyFingerprint(publicKeyFingerprint);
+    audit.setSigningKeyType(signingKeyType);
+    audit.setFieldChanges(Map.of());
+    audit.setArtifactSnapshot(artifactToSnapshot(artifact));
+    audit.setClientIp(clientIp);
+    audit.setUserAgent(userAgent);
+
+    artifactAuditRepository.save(audit);
+    return artifact;
+  }
+
+  @Transactional
+  public Artifact updateArtifact(
+      UUID artifactId, ArtifactUpdateRequest req, String clientIp, String userAgent) {
+    Artifact artifact =
+        artifactRepo
+            .findById(artifactId)
+            .orElseThrow(() -> new IllegalArgumentException("Artifact not found"));
+
+    Map<String, Object> changes = new HashMap<>();
+
+    if (req.getTags() != null) {
+      changes.put("tags", Map.of("old", artifact.getTags(), "new", req.getTags()));
+      artifact.setTags(req.getTags());
+    }
+
+    if (req.getLabels() != null) {
+      changes.put("labels", Map.of("old", artifact.getLabels(), "new", req.getLabels()));
+      artifact.setLabels(req.getLabels());
+    }
+
+    artifact.setChangeVersion(artifact.getChangeVersion() + 1);
+    Artifact saved = artifactRepo.save(artifact);
+
+    ArtifactAudit audit = new ArtifactAudit();
+    audit.setArtifactId(saved.getId());
+    audit.setVersion(saved.getChangeVersion());
+    audit.setOperation("UPDATE");
+    audit.setChangedBy(req.getChangedBy());
+    audit.setSignature(req.getSignature());
+    audit.setPublicKey(req.getPublicKey());
+    audit.setPublicKeyFingerprint(req.getPublicKeyFingerprint());
+    audit.setSigningKeyType(req.getSigningKeyType());
+    audit.setFieldChanges(changes);
+    audit.setArtifactSnapshot(artifactToSnapshot(saved));
+    audit.setClientIp(clientIp);
+    audit.setUserAgent(userAgent);
+    audit.setReason(req.getReason());
+
+    artifactAuditRepository.save(audit);
+    return saved;
+  }
+
+  private Map<String, Object> artifactToSnapshot(Artifact artifact) {
+    Map<String, Object> snapshot = new HashMap<>();
+    snapshot.put("id", artifact.getId().toString());
+    snapshot.put("catalogReference", artifact.getCatalogReference());
+    snapshot.put("kind", artifact.getKind());
+    snapshot.put("name", artifact.getName());
+    snapshot.put("artifactVersion", artifact.getArtifactVersion());
+    snapshot.put("digest", artifact.getDigest());
+    snapshot.put("registry", artifact.getRegistry());
+    snapshot.put("repository", artifact.getRepository());
+    snapshot.put("uri", artifact.getUri());
+    snapshot.put("tags", artifact.getTags());
+    snapshot.put("labels", artifact.getLabels());
+    snapshot.put("sources", artifact.getSources());
+    snapshot.put("builders", artifact.getBuilders());
+    return snapshot;
+  }
+
+  public List<ArtifactAudit> getArtifactAuditHistory(UUID artifactId) {
+    return artifactAuditRepository.findByArtifactIdOrderByVersionDesc(artifactId);
   }
 }

@@ -6,7 +6,6 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -15,8 +14,7 @@ import org.hibernate.type.SqlTypes;
 public class Artifact {
 
   @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 
@@ -31,6 +29,9 @@ public class Artifact {
 
   @Column(name = "version")
   private String artifactVersion;
+
+  @Column(name = "change_version")
+  private Long changeVersion;
 
   @Column(name = "digest", unique = true)
   private String digest;
@@ -76,6 +77,18 @@ public class Artifact {
   @OneToMany(mappedBy = "artifact", cascade = CascadeType.ALL, orphanRemoval = true)
   private Set<ArtifactVerification> verifications;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "sources_jsonb", nullable = false)
+  private Set<String> sources;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "builders_jsonb", nullable = false)
+  private Set<String> builders;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "tags_jsonb", nullable = false)
+  private Map<String, String> tags;
+
   @PrePersist
   public void onCreate() {
     if (createdAt == null) {
@@ -83,6 +96,15 @@ public class Artifact {
     }
     if (labels == null) {
       labels = Map.of();
+    }
+    if (sources == null) {
+      sources = Set.of();
+    }
+    if (builders == null) {
+      builders = Set.of();
+    }
+    if (tags == null) {
+      tags = Map.of();
     }
   }
 
@@ -231,6 +253,30 @@ public class Artifact {
     this.verifications = verifications;
   }
 
+  public Set<String> getSources() {
+    return sources;
+  }
+
+  public void setSources(Set<String> sources) {
+    this.sources = sources;
+  }
+
+  public Set<String> getBuilders() {
+    return builders;
+  }
+
+  public void setBuilders(Set<String> builders) {
+    this.builders = builders;
+  }
+
+  public Map<String, String> getTags() {
+    return tags;
+  }
+
+  public void setTags(Map<String, String> tags) {
+    this.tags = tags;
+  }
+
   @Override
   public String toString() {
     return "Artifact{"
@@ -274,5 +320,13 @@ public class Artifact {
         + ", verifications="
         + verifications
         + '}';
+  }
+
+  public Long getChangeVersion() {
+    return changeVersion;
+  }
+
+  public void setChangeVersion(Long changeVersion) {
+    this.changeVersion = changeVersion;
   }
 }

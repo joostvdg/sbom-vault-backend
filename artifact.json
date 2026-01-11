@@ -1,0 +1,11 @@
+{
+  "catalogReference": "example-catalog",
+  "kind": "container",
+  "name": "example-artifact",
+  "artifactVersion": "1.0.0",
+  "digest": "sha256:0123456789abcdef",
+  "registry": "ghcr.io",
+  "repository": "joostvdg/example-artifact",
+  "uri": "ghcr.io/joostvdg/example-artifact:1.0.0",
+  "labels": {"env": "dev", "team": "platform"}
+}

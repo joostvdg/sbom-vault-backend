@@ -83,9 +83,53 @@ http GET localhost:8080/api/artifacts/registry.example.com/app:v1.0.0
 ```
 
 
+
+### Generate SSH Signing Key
+
+Create an Ed25519 key pair specifically for signing artifacts:
+
+```bash
+# Generate Ed25519 key pair
+ssh-keygen -t ed25519 -C "your.email@example.com" -f ~/.ssh/artifact_signing_key
+```
+
+```bash
+# Don't set a passphrase if using in CI/CD, or set one for interactive use
+# View public key
+cat ~/.ssh/artifact_signing_key.pub
+
+# Get key fingerprint
+ssh-keygen -lf ~/.ssh/artifact_signing_key.pub
+````
+
 ### Create Artifact
 
+**Using httpie:**
+
 ```shell
+# Prepare artifact data
+cat > artifact.json << 'EOF'
+{
+  "catalogReference": "example-catalog",
+  "kind": "container",
+  "name": "example-artifact",
+  "artifactVersion": "1.0.0",
+  "digest": "sha256:0123456789abcdef",
+  "registry": "ghcr.io",
+  "repository": "joostvdg/example-artifact",
+  "uri": "ghcr.io/joostvdg/example-artifact:1.0.0",
+  "labels": {"env": "dev", "team": "platform"}
+}
+EOF
+
+# Create signature
+SIGNATURE=$(echo -n "$(cat artifact.json)" | ssh-keygen -Y sign -n artifact -f ~/.ssh/artifact_signing_key | grep -A 100 "BEGIN SSH SIGNATURE" | base64 -w 0)
+
+# Get public key and fingerprint
+PUBLIC_KEY=$(cat ~/.ssh/artifact_signing_key.pub)
+FINGERPRINT=$(ssh-keygen -lf ~/.ssh/artifact_signing_key.pub | awk '{print $2}')
+
+# Create artifact with audit
 http POST http://localhost:8080/api/artifacts \
   catalogReference="example-catalog" \
   kind="container" \
@@ -95,8 +139,38 @@ http POST http://localhost:8080/api/artifacts \
   registry="ghcr.io" \
   repository="joostvdg/example-artifact" \
   uri="ghcr.io/joostvdg/example-artifact:1.0.0" \
-  labels:='{"env":"dev","team":"platform"}'
+  labels:='{"env":"dev","team":"platform"}' \
+  X-Changed-By:"user@example.com" \
+  X-Signature:"${SIGNATURE}" \
+  X-Public-Key:"${PUBLIC_KEY}" \
+  X-Public-Key-Fingerprint:"${FINGERPRINT}" \
+  X-Signing-Key-Type:"ssh-ed25519"
 ```
+
+**Using curl:**
+
+```shell
+# Using the same variables from above
+curl -X POST http://localhost:8080/api/artifacts \
+  -H "Content-Type: application/json" \
+  -H "X-Changed-By: user@example.com" \
+  -H "X-Signature: ${SIGNATURE}" \
+  -H "X-Public-Key: ${PUBLIC_KEY}" \
+  -H "X-Public-Key-Fingerprint: ${FINGERPRINT}" \
+  -H "X-Signing-Key-Type: ssh-ed25519" \
+  -d '{
+    "catalogReference": "example-catalog",
+    "kind": "container",
+    "name": "example-artifact",
+    "artifactVersion": "1.0.0",
+    "digest": "sha256:0123456789abcdef",
+    "registry": "ghcr.io",
+    "repository": "joostvdg/example-artifact",
+    "uri": "ghcr.io/joostvdg/example-artifact:1.0.0",
+    "labels": {"env": "dev", "team": "platform"}
+  }'
+```
+
 
 ### Get All Artifacts
 
@@ -119,4 +193,122 @@ http POST http://localhost:8080/api/artifacts/${UUID}/sboms \
   docVersion="1.0" \
   jsonb:=@mySBOM.json
 
+```
+
+## Artifact Audit System
+
+All artifact changes are tracked with SSH signature verification, similar to GitHub's commit signing.
+
+### How It Works
+
+1. **Generate SSH Key**: Create an Ed25519 key pair for signing
+2. **Sign Changes**: Sign artifact data with your private key
+3. **Submit Request**: Include signature, public key, and fingerprint
+4. **Verification**: System verifies signature and stores audit record
+
+### Setup SSH Signing Key
+
+```bash
+# Generate Ed25519 key
+ssh-keygen -t ed25519 -C "your.email@example.com" -f ~/.ssh/artifact_signing_key
+```
+
+```sh
+# Get public key
+cat ~/.ssh/artifact_signing_key.pub
+```
+
+```sh
+# Get fingerprint
+ssh-keygen -lf ~/.ssh/artifact_signing_key.pub
+```
+
+
+### Create and Update Artifact with Audit
+```sh
+# Prepare artifact data
+cat > artifact.json << 'EOF'
+{
+  "catalogReference": "example-catalog",
+  "kind": "container",
+  "name": "example-artifact",
+  "artifactVersion": "1.0.0",
+  "digest": "sha256:0123456789abcdef",
+  "registry": "ghcr.io",
+  "repository": "joostvdg/example-artifact",
+  "uri": "ghcr.io/joostvdg/example-artifact:1.0.0",
+  "labels": {"env": "dev", "team": "platform"}
+}
+EOF
+```
+
+```sh
+# Create signature
+SIGNATURE=$(echo -n "$(cat artifact.json)" | ssh-keygen -Y sign -n artifact -f ~/.ssh/artifact_signing_key | grep -A 100 "BEGIN SSH SIGNATURE" | base64 -w 0)
+```
+
+```sh
+# Get public key and fingerprint
+PUBLIC_KEY=$(cat ~/.ssh/artifact_signing_key.pub)
+FINGERPRINT=$(ssh-keygen -lf ~/.ssh/artifact_signing_key.pub | awk '{print $2}')
+```
+
+```sh
+# Create artifact with audit
+http POST http://localhost:8080/api/artifacts \
+  catalogReference="example-catalog" \
+  kind="container" \
+  name="example-artifact" \
+  artifactVersion="1.0.0" \
+  digest="sha256:0123456789abcdef" \
+  registry="ghcr.io" \
+  repository="joostvdg/example-artifact" \
+  uri="ghcr.io/joostvdg/example-artifact:1.0.0" \
+  labels:='{"env":"dev","team":"platform"}' \
+  changedBy="user@example.com" \
+  signature="${SIGNATURE}" \
+  publicKey="${PUBLIC_KEY}" \
+  publicKeyFingerprint="${FINGERPRINT}" \
+  signingKeyType="ssh-ed25519"
+```
+
+### Update Artifact with Audit
+
+```sh
+UUID="9b64c4da-0bbb-42c9-bdbd-cb3422c8be04"
+```
+
+Prepare update data
+
+```sh
+cat > update.json << 'EOF'
+{
+  "tags": {"version": "1.0.1", "stage": "production"},
+  "reason": "Production deployment"
+}
+EOF
+```
+
+Sign update
+
+```sh
+UPDATE_SIG=$(echo -n "$(cat update.json)" | ssh-keygen -Y sign -n artifact -f ~/.ssh/artifact_signing_key | grep -A 100 "BEGIN SSH SIGNATURE" | base64 -w 0)
+```
+
+Apply update
+```sh
+http PATCH http://localhost:8080/api/artifacts/${UUID} \
+  tags:='{"version":"1.0.1","stage":"production"}' \
+  reason="Production deployment" \
+  changedBy="user@example.com" \
+  signature="${UPDATE_SIG}" \
+  publicKey="${PUBLIC_KEY}" \
+  publicKeyFingerprint="${FINGERPRINT}" \
+  signingKeyType="ssh-ed25519"
+```
+
+### View Audit Records
+
+```sh
+http GET http://localhost:8080/api/artifacts/${UUID}/audit
 ```
