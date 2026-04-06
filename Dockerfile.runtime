@@ -1,0 +1,16 @@
+# syntax=docker/dockerfile:1.7
+FROM cgr.dev/chainguard/jre:latest
+
+WORKDIR /application
+
+# Copy pre-extracted Spring Boot layers
+COPY .docker-prep/application/ ./
+
+# Copy prebuilt Java 25 AOT cache
+COPY .docker-prep/application/app.aot ./app.aot
+
+ENV JAVA_TOOL_OPTIONS="-XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/urandom"
+
+EXPOSE 8080
+
+ENTRYPOINT ["java", "-XX:AOTCache=app.aot", "-jar", "application.jar"]

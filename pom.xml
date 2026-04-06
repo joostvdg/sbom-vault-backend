@@ -2,16 +2,23 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example</groupId>
+  <groupId>net.joostvdg.slsa</groupId>
   <artifactId>sbom-vault-backend</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <name>SBOM Vault Backend</name>
 
+  <packaging>jar</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.5</version>
+    </parent>
 
   <properties>
     <java.version>25</java.version>
-    <spring-boot.version>3.5.7</spring-boot.version>
-    <vaadin.version>24.4.9</vaadin.version>
+    <spring-boot.version>4.0.5</spring-boot.version>
+    <vaadin.version>25.1.1</vaadin.version>
 
       <spotless.version>2.44.5</spotless.version>
       <error-prone.version>2.38.0</error-prone.version>
@@ -51,15 +58,19 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.springframework.boot</groupId>-->
-<!--      <artifactId>spring-boot-starter-security</artifactId>-->
-<!--    </dependency>-->
+
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin-spring-boot-starter</artifactId>
-      <version>${vaadin.version}</version>
+        <version>${vaadin.version}</version>
     </dependency>
+      <dependency>
+          <groupId>com.vaadin</groupId>
+          <artifactId>vaadin-dev</artifactId>
+          <optional>true</optional>
+          <version>25.1.1</version>
+      </dependency>
+
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
@@ -79,11 +90,11 @@
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>2.8.14</version>
     </dependency>
-    <dependency>
-      <groupId>com.vladmihalcea</groupId>
-      <artifactId>hibernate-types-60</artifactId>
-      <version>2.21.1</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.vladmihalcea</groupId>-->
+<!--      <artifactId>hibernate-types-60</artifactId>-->
+<!--      <version>2.21.1</version>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
@@ -102,11 +113,13 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
+        <version>1.21.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
+      <finalName>sbom-vault-backend</finalName>
 
       <!-- explicit source roots (Maven defaults to these, but explicit helps IDEs) -->
       <sourceDirectory>src/main/java</sourceDirectory>
@@ -128,6 +141,20 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
+
+        <plugin>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-maven-plugin</artifactId>
+            <version>${vaadin.version}</version>
+            <executions>
+                <execution>
+                    <id>build-frontend</id>
+                    <goals>
+                        <goal>build-frontend</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-checkstyle-plugin</artifactId>
@@ -242,4 +269,6 @@
         </plugin>
     </plugins>
   </build>
+
+
 </project>

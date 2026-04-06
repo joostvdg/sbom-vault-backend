@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 @Entity
@@ -13,8 +14,8 @@ import org.hibernate.type.SqlTypes;
 public class Attestation {
 
   @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+  @GeneratedValue
+  @UuidGenerator
   @Column(name = "id", updatable = false, nullable = false)
   private UUID id;
 

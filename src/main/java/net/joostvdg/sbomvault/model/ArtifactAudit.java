@@ -6,6 +6,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 @Entity
@@ -13,7 +14,8 @@ import org.hibernate.type.SqlTypes;
 public class ArtifactAudit {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  @GeneratedValue
+  @UuidGenerator
   private UUID id;
 
   @Column(name = "artifact_id", nullable = false)

@@ -52,27 +52,19 @@ export declare enum MessageType {
     WARNING = "warning",
     ERROR = "error"
 }
-interface Message {
-    id: number;
-    type: MessageType;
-    message: string;
-    details?: string;
-    link?: string;
-    persistentId?: string;
-    dontShowAgain: boolean;
-    dontShowAgainMessage?: string;
-    deleted: boolean;
-}
 type DevToolsConf = {
     enable: boolean;
     url: string;
+    contextRelativePath: string;
     backend?: string;
-    liveReloadPort: number;
+    liveReloadPort?: number;
     token?: string;
+    usageStatisticsEnabled?: boolean;
 };
 export declare class VaadinDevTools extends LitElement {
     unhandledMessages: ServerMessage[];
     conf: DevToolsConf;
+    bodyShadowRoot: ShadowRoot | null;
     static get styles(): import("lit").CSSResult[];
     static DISMISSED_NOTIFICATIONS_IN_LOCAL_STORAGE: string;
     static ACTIVE_KEY_IN_SESSION_STORAGE: string;
@@ -84,9 +76,6 @@ export declare class VaadinDevTools extends LitElement {
     static SPRING_BOOT_DEVTOOLS: string;
     static BACKEND_DISPLAY_NAME: Record<string, string>;
     static get isActive(): boolean;
-    static notificationDismissed(persistentId: string): boolean;
-    splashMessage?: string;
-    notifications: Message[];
     frontendStatus: ConnectionStatus;
     javaStatus: ConnectionStatus;
     private root;
@@ -94,27 +83,22 @@ export declare class VaadinDevTools extends LitElement {
     private javaConnection?;
     private frontendConnection?;
     private nextMessageId;
-    private disableEventListener?;
     private transitionDuration;
     elementTelemetry(): void;
     openWebSocketConnection(): void;
+    removeOldLinks(path: string): void;
     tabHandleMessage(tabElement: HTMLElement, message: ServerMessage): boolean;
     handleFrontendMessage(message: ServerMessage): void;
+    handleHmrMessage(message: ServerMessage): boolean;
     getDedicatedWebSocketUrl(): string | undefined;
     getSpringBootWebSocketUrl(location: any): string;
     connectedCallback(): void;
     initPlugin(plugin: DevToolsPlugin): Promise<void>;
     format(o: any): string;
-    disconnectedCallback(): void;
-    showSplashMessage(msg: string | undefined): void;
-    demoteSplashMessage(): void;
     checkLicense(productInfo: Product): void;
-    showNotification(type: MessageType, message: string, details?: string, link?: string, persistentId?: string, dontShowAgainMessage?: string): void;
-    dismissNotification(id: number): void;
-    findNotificationIndex(id: number): number;
-    toggleDontShowAgain(id: number): void;
+    startPreTrial(): void;
+    downloadLicense(productInfo: Product): void;
     setActive(yes: boolean): void;
-    renderMessage(messageObject: Message): import("lit-html").TemplateResult<1>;
     render(): import("lit-html").TemplateResult<1>;
     setJavaLiveReloadActive(active: boolean): void;
 }

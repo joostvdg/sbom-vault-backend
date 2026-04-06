@@ -312,3 +312,33 @@ http PATCH http://localhost:8080/api/artifacts/${UUID} \
 ```sh
 http GET http://localhost:8080/api/artifacts/${UUID}/audit
 ```
+
+## Create Artifacts
+
+```shell
+mvn clean verify
+```
+
+```shell
+
+```
+
+## Local Tool Scanning & Signing
+
+* Cosign: https://github.com/sigstore/cosign
+    * https://edu.chainguard.dev/open-source/sigstore/cosign/how-to-install-cosign/   
+* Syft: https://oss.anchore.com/docs/installation/syft/
+* Trivy
+* Snyk
+
+### Cosign
+
+```sh
+brew install cosign
+```
+
+### Syft
+
+```shell
+curl -sSfL https://get.anchore.io/syft | sudo sh -s -- -b /usr/local/bin
+```

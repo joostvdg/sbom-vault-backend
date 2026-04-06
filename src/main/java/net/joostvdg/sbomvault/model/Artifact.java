@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
 
 @Entity
@@ -14,8 +15,9 @@ import org.hibernate.type.SqlTypes;
 public class Artifact {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   @Column(name = "id", updatable = false, nullable = false)
+  @GeneratedValue
+  @UuidGenerator
   private UUID id;
 
   @Column(name = "catalog_reference", nullable = false)

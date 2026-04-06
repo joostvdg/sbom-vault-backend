@@ -1,0 +1,64 @@
+{
+  "buildDefinition": {
+    "buildType": "https://github.com/moby/buildkit/blob/master/docs/attestations/slsa-definitions.md",
+    "externalParameters": {
+      "configSource": {
+        "path": "Dockerfile.runtime"
+      },
+      "request": {
+        "args": {
+          "cmdline": "docker/dockerfile:1.7",
+          "source": "docker/dockerfile:1.7"
+        },
+        "frontend": "gateway.v0",
+        "locals": [
+          {
+            "name": "context"
+          },
+          {
+            "name": "dockerfile"
+          }
+        ]
+      }
+    },
+    "internalParameters": {
+      "builderPlatform": "linux/amd64"
+    },
+    "resolvedDependencies": [
+      {
+        "digest": {
+          "sha256": "46321b451abc16f037ce041d0d3600ad15abbac5562591a025dcafabcafa0ea8"
+        },
+        "uri": "pkg:docker/cgr.dev/chainguard/jre@latest?platform=linux%2Famd64"
+      },
+      {
+        "digest": {
+          "sha256": "a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e"
+        },
+        "uri": "pkg:docker/docker/dockerfile@1.7"
+      }
+    ]
+  },
+  "runDetails": {
+    "builder": {
+      "id": ""
+    },
+    "metadata": {
+      "buildkit_completeness": {
+        "request": true,
+        "resolvedDependencies": false
+      },
+      "buildkit_metadata": {
+        "vcs": {
+          "localdir:context": ".",
+          "localdir:dockerfile": ".",
+          "revision": "823a0db5f463e88f26185ab7d12d010356aab67a",
+          "source": "git@github.com:joostvdg/sbom-vault-backend.git"
+        }
+      },
+      "finishedOn": "2026-04-05T19:02:24.358272041Z",
+      "invocationId": "thbsxyay7etz4g9993rssoef1",
+      "startedOn": "2026-04-05T19:02:18.8092654Z"
+    }
+  }
+}
