@@ -13,10 +13,7 @@ import org.hibernate.type.SqlTypes;
 @Table(name = "artifact_audit")
 public class ArtifactAudit {
 
-  @Id
-  @GeneratedValue
-  @UuidGenerator
-  private UUID id;
+  @Id @GeneratedValue @UuidGenerator private UUID id;
 
   @Column(name = "artifact_id", nullable = false)
   private UUID artifactId;
